@@ -41,26 +41,26 @@ There are two projects in this sample.  Each needs to be separately registered i
 11. Find the Client ID value and copy it aside, you will need this later when configuring your application.
 12. Using the Manage Manifest button in the drawer, download the manifest file for the application.
 13. Add a permission to the application by replacing the appPermissions section with this block.  You will need to create a new GUID and replace the permissionId GUID in the JSON below.
-`"appPermissions": [                                                                                              `
-` {                                                                                                               `
-`   "claimValue": "user_impersonation",                                                                           `
-`   "description": "Allow the application full access to the To Do List service on behalf of the signed-in user", `
-`   "directAccessGrantTypes": [],                                                                                 `
-`   "displayName": "Have full access to the To Do List service",                                                  `
-`   "impersonationAccessGrantTypes": [                                                                            `
-`     {                                                                                                           `
-`       "impersonated": "User",                                                                                   `
-`       "impersonator": "Application"                                                                             `
-`     }                                                                                                           `
-`   ],                                                                                                            `
-`   "isDisabled": false,                                                                                          `
-`   "origin": "Application",                                                                                      `
-`   "permissionId": "b69ee3c9-c40d-4f2a-ac80-961cd1534e40",                                                       `
-`   "resourceScopeType": "Personal",                                                                              `
-`   "userConsentDescription": "Allow the application full access to the To Do service on your behalf",            `
-`   "userConsentDisplayName": "Have full access to the To Do service"                                             `
-` }                                                                                                               `
-`],                                                                                                               `
+`"appPermissions": [                                                                              `
+` {                                                                                               `
+`   "claimValue": "user_impersonation",                                                           `
+`   "description": "Allow full access to the To Do List service on behalf of the signed-in user", `
+`   "directAccessGrantTypes": [],                                                                 `
+`   "displayName": "Have full access to the To Do List service",                                  `
+`   "impersonationAccessGrantTypes": [                                                            `
+`     {                                                                                           `
+`       "impersonated": "User",                                                                   `
+`       "impersonator": "Application"                                                             `
+`     }                                                                                           `
+`   ],                                                                                            `
+`   "isDisabled": false,                                                                          `
+`   "origin": "Application",                                                                      `
+`   "permissionId": "b69ee3c9-c40d-4f2a-ac80-961cd1534e40",                                       `
+`   "resourceScopeType": "Personal",                                                              `
+`   "userConsentDescription": "Allow full access to the To Do service on your behalf",            `
+`   "userConsentDisplayName": "Have full access to the To Do service"                             `
+` }                                                                                               `
+`],                                                                                               `
 14. Using the Manage Manfiest button, upload the updated manifest file.  Save the configuration of the app.
 
 #### Register the TodoListWebApp web app
