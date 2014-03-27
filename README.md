@@ -3,12 +3,14 @@ WebApp-WebAPI-OpenIDConnect-DotNet
 
 This sample shows how to build an MVC web application that uses Azure AD for sign-in using the OpenID Connect protocol, and then calls a web API under the signed-in user's identity using tokens obtained via OAuth 2.0. This sample uses the OpenID Connect ASP.Net OWIN middleware and ADAL .Net.
 
+For more information about how the protocols work in this scenario and other scenarios, see the [Authentication Scenarios](http://msdn.microsoft.com/aad) for Azure AD document.
+
 ## How To Run This Sample
 
 To run this sample you will need:
 - Visual Studio 2013
 - An Internet connection
-- An Azure subscription
+- An Azure subscription (a free trial is sufficient)
 
 Every Azure subscription has an associated Azure Active Directory tenant.  If you don't already have an Azure subscription, you can get a free subscription by signing up at [http://wwww.windowsazure.com](http://www.windowsazure.com).  All of the Azure AD features used by this sample are available free of charge.
 
@@ -41,26 +43,28 @@ There are two projects in this sample.  Each needs to be separately registered i
 11. Find the Client ID value and copy it aside, you will need this later when configuring your application.
 12. Using the Manage Manifest button in the drawer, download the manifest file for the application.
 13. Add a permission to the application by replacing the appPermissions section with this block.  You will need to create a new GUID and replace the permissionId GUID in the JSON below.
-`"appPermissions": [                                                                              `
-` {                                                                                               `
-`   "claimValue": "user_impersonation",                                                           `
-`   "description": "Allow full access to the To Do List service on behalf of the signed-in user", `
-`   "directAccessGrantTypes": [],                                                                 `
-`   "displayName": "Have full access to the To Do List service",                                  `
-`   "impersonationAccessGrantTypes": [                                                            `
-`     {                                                                                           `
-`       "impersonated": "User",                                                                   `
-`       "impersonator": "Application"                                                             `
-`     }                                                                                           `
-`   ],                                                                                            `
-`   "isDisabled": false,                                                                          `
-`   "origin": "Application",                                                                      `
-`   "permissionId": "b69ee3c9-c40d-4f2a-ac80-961cd1534e40",                                       `
-`   "resourceScopeType": "Personal",                                                              `
-`   "userConsentDescription": "Allow full access to the To Do service on your behalf",            `
-`   "userConsentDisplayName": "Have full access to the To Do service"                             `
-` }                                                                                               `
-`],                                                                                               `
+```
+"appPermissions": [
+{
+	"claimValue": "user_impersonation",
+	"description": "Allow full access to the To Do List service on behalf of the signed-in user",
+	"directAccessGrantTypes": [],
+	"displayName": "Have full access to the To Do List service",
+	"impersonationAccessGrantTypes": [
+		{
+			"impersonated": "User",
+		    "impersonator": "Application"
+		}
+	],
+	"isDisabled": false,
+	"origin": "Application",
+	"permissionId": "b69ee3c9-c40d-4f2a-ac80-961cd1534e40",
+	"resourceScopeType": "Personal",
+	"userConsentDescription": "Allow full access to the To Do service on your behalf",
+	"userConsentDisplayName": "Have full access to the To Do service"
+	}
+],
+```
 14. Using the Manage Manfiest button, upload the updated manifest file.  Save the configuration of the app.
 
 #### Register the TodoListWebApp web app
