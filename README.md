@@ -41,26 +41,26 @@ There are two projects in this sample.  Each needs to be separately registered i
 11. Find the Client ID value and copy it aside, you will need this later when configuring your application.
 12. Using the Manage Manifest button in the drawer, download the manifest file for the application.
 13. Add a permission to the application by replacing the appPermissions section with this block.  You will need to create a new GUID and replace the permissionId GUID in the JSON below.
-	  `"appPermissions": [                                                                                              `
-	  ` {                                                                                                               `
-	  `   "claimValue": "user_impersonation",                                                                           `
-	  `   "description": "Allow the application full access to the To Do List service on behalf of the signed-in user", `
-	  `   "directAccessGrantTypes": [],                                                                                 `
-	  `   "displayName": "Have full access to the To Do List service",                                                  `
-	  `   "impersonationAccessGrantTypes": [                                                                            `
-	  `     {                                                                                                           `
-	  `       "impersonated": "User",                                                                                   `
-	  `       "impersonator": "Application"                                                                             `
-	  `     }                                                                                                           `
-	  `   ],                                                                                                            `
-	  `   "isDisabled": false,                                                                                          `
-	  `   "origin": "Application",                                                                                      `
-	  `   "permissionId": "b69ee3c9-c40d-4f2a-ac80-961cd1534e40",                                                       `
-	  `   "resourceScopeType": "Personal",                                                                              `
-	  `   "userConsentDescription": "Allow the application full access to the To Do service on your behalf",            `
-	  `   "userConsentDisplayName": "Have full access to the To Do service"                                             `
-	  ` }                                                                                                               `
-	  `],                                                                                                               `
+`"appPermissions": [                                                                                              `
+` {                                                                                                               `
+`   "claimValue": "user_impersonation",                                                                           `
+`   "description": "Allow the application full access to the To Do List service on behalf of the signed-in user", `
+`   "directAccessGrantTypes": [],                                                                                 `
+`   "displayName": "Have full access to the To Do List service",                                                  `
+`   "impersonationAccessGrantTypes": [                                                                            `
+`     {                                                                                                           `
+`       "impersonated": "User",                                                                                   `
+`       "impersonator": "Application"                                                                             `
+`     }                                                                                                           `
+`   ],                                                                                                            `
+`   "isDisabled": false,                                                                                          `
+`   "origin": "Application",                                                                                      `
+`   "permissionId": "b69ee3c9-c40d-4f2a-ac80-961cd1534e40",                                                       `
+`   "resourceScopeType": "Personal",                                                                              `
+`   "userConsentDescription": "Allow the application full access to the To Do service on your behalf",            `
+`   "userConsentDisplayName": "Have full access to the To Do service"                                             `
+` }                                                                                                               `
+`],                                                                                                               `
 14. Using the Manage Manfiest button, upload the updated manifest file.  Save the configuration of the app.
 
 #### Register the TodoListWebApp web app
@@ -136,13 +136,7 @@ Coming soon.
 1. In Visual Studio 2013, create a new ASP.Net MVC web application with Authentication set to No Authentication.
 2. Set SSL Enabled to be True.  Note the SSL URL.
 3. In the project properties, Web properties, set the Project Url to be the SSL URL.
-4. Add the following ASP.Net OWIN middleware NuGets
-	NOTE:  For pre-release users, to find these NuGets you must add the AzureADWebStackNightly feed (http://www.myget.org/f/azureadwebstacknightly/) for the first two NuGets and the AspNetWebStackNightly feed (http://www.myget.org/f/aspnetwebstacknightly/) for the latter three NuGets.
-	Microsoft.IdentityModel.Protocol.Extensions
-	System.IdentityModel.Tokens.Jwt
-	Microsoft.Owin.Security.OpenIdConnect
-	Microsoft.Owin.Security.Cookies
-	Microsoft.Owin.Host.SystemWeb
+4. Add the following ASP.Net OWIN middleware NuGets: (NOTE:  For pre-release users, to find these NuGets you must add the AzureADWebStackNightly feed http://www.myget.org/f/azureadwebstacknightly/ for the first two NuGets and the AspNetWebStackNightly feed http://www.myget.org/f/aspnetwebstacknightly/ for the latter three NuGets) Microsoft.IdentityModel.Protocol.Extensions, System.IdentityModel.Tokens.Jwt, Microsoft.Owin.Security.OpenIdConnect, Microsoft.Owin.Security.Cookies, Microsoft.Owin.Host.SystemWeb.
 5. Add the Active Directory Authentication Library NuGet (`Microsoft.IdentityModel.Clients.ActiveDirectory`).
 6. In the `App_Start` folder, create a class `Startup.Auth.cs`.  You will need to remove `.App_Start` from the namespace name.  Replace the code for the `Startup` class with the code from the same file of the sample app.  Be sure to take the whole class definition!  The definition changes from `public class Startup` to `public partial class Startup`.
 7. Right-click on the project, select Add,  select "OWIN Startup class", and name the class "Startup".  If "OWIN Startup Class" doesn't appear in the menu, instead select "Class", and in the search box enter "OWIN".  "OWIN Startup class" will appear as a selection; select it, and name the class `Startup.cs`.
