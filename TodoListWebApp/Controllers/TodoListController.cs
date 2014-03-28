@@ -20,7 +20,7 @@ namespace TodoListWebApp.Controllers
     public class TodoListController : Controller
     {
         private string todoListResourceId = "https://skwantoso.com/TodoListService";
-        private string todoListBaseAddress = "https://localhost:44321/";
+        private string todoListBaseAddress = "https://localhost:44321";
         private const string TenantIdClaimType = "http://schemas.microsoft.com/identity/claims/tenantid";
 
         //

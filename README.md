@@ -42,7 +42,9 @@ There are two projects in this sample.  Each needs to be separately registered i
 10. While still in the Azure portal, click the Configure tab of your application.
 11. Find the Client ID value and copy it aside, you will need this later when configuring your application.
 12. Using the Manage Manifest button in the drawer, download the manifest file for the application.
-13. Add a permission to the application by replacing the appPermissions section with this block.  You will need to create a new GUID and replace the permissionId GUID in the JSON below.
+13. Add a permission to the application by replacing the appPermissions section with the block of JSON below.  You will need to create a new GUID and replace the example permissionId GUID.
+14. Using the Manage Manfiest button, upload the updated manifest file.  Save the configuration of the app.
+
 ```JSON
 "appPermissions": [
 {
@@ -65,7 +67,6 @@ There are two projects in this sample.  Each needs to be separately registered i
 	}
 ],
 ```
-14. Using the Manage Manfiest button, upload the updated manifest file.  Save the configuration of the app.
 
 #### Register the TodoListWebApp web app
 
@@ -105,7 +106,6 @@ There are two projects in this sample.  Each needs to be separately registered i
 8. In the `TodoListController` and make sure the `todoListBaseAddress` has the correct value for the address of the TodoListService project.
 9. Also in the `TodoListController`, update the `todoResourceId` to be the App ID URI registered for the TodoListService, for example `https://<your_tenant_name>/TodoListService`.
 
-
 ### Step 5:  Trust the IIS Express SSL certificate
 
 Since the web API is SSL protected, the client of the API (the web app) will refuse the SSL connection to the web API unless it trusts the API's SSL certificate.
@@ -129,7 +129,7 @@ Coming soon.
 ### Creating the TodoListService Project
 
 1. In Visual Studio 2013, create an empty solution to host the two projects.
-2. In the solution, create a new ASP.Net MVC web API project and while creating the project, click the Change Authentication button, select Organizational Accounts, Cloud - Single Organization, enter the name of your Azure AD tenant, and set the Access Level to Single Sign On.  You will be prompted to sign-in to your Azure AD tenant.  NOTE:  You must sign-in with a user that is in the tenant; you cannot, during this step, sign-in with a Microsoft account.
+2. In the solution, create a new ASP.Net MVC web API project called TodoListService and while creating the project, click the Change Authentication button, select Organizational Accounts, Cloud - Single Organization, enter the name of your Azure AD tenant, and set the Access Level to Single Sign On.  You will be prompted to sign-in to your Azure AD tenant.  NOTE:  You must sign-in with a user that is in the tenant; you cannot, during this step, sign-in with a Microsoft account.
 3. In the `Models` folder add a new class called `TodoItem.cs`.  Copy the implementation of TodoItem from this sample into the class.
 4. Add a new, empty, Web API 2 controller called `TodoListController`.
 5. Copy the implementation of the TodoListController from this sample into the controller.  Don't forget to add the `[Authorize]` attribute to the class.
@@ -137,7 +137,7 @@ Coming soon.
 
 ### Creating the TodoListWebApp Project
 
-1. In Visual Studio 2013, create a new ASP.Net MVC web application with Authentication set to No Authentication.
+1. In Visual Studio 2013, create a new ASP.Net MVC web application called TodoListWebApp with Authentication set to No Authentication.
 2. Set SSL Enabled to be True.  Note the SSL URL.
 3. In the project properties, Web properties, set the Project Url to be the SSL URL.
 4. Add the following ASP.Net OWIN middleware NuGets: (NOTE:  For pre-release users, to find these NuGets you must add the AzureADWebStackNightly feed http://www.myget.org/f/azureadwebstacknightly/ for the first two NuGets and the AspNetWebStackNightly feed http://www.myget.org/f/aspnetwebstacknightly/ for the latter three NuGets) Microsoft.IdentityModel.Protocol.Extensions, System.IdentityModel.Tokens.Jwt, Microsoft.Owin.Security.OpenIdConnect, Microsoft.Owin.Security.Cookies, Microsoft.Owin.Host.SystemWeb.
@@ -159,4 +159,4 @@ Coming soon.
 20. In `Views` --> `UserProfile` create a new view, `Index.cshtml`, and copy the implementation from this sample.
 21. In the shared `_Layout` view, add the Action Links for Profile and To Do List that are in the sample.
 
-Finally, in the properties of the solution itself, set both projects as startup projects.  Build and run!
+Finally, in the properties of the solution itself, set both projects as startup projects.
