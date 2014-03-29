@@ -126,18 +126,19 @@ Coming soon.
 
 ## How To Recreate This Sample
 
+First, in Visual Studio 2013 create an empty solution to host the  projects.  Then, follow these steps to create each project.
+
 ### Creating the TodoListService Project
 
-1. In Visual Studio 2013, create an empty solution to host the two projects.
-2. In the solution, create a new ASP.Net MVC web API project called TodoListService and while creating the project, click the Change Authentication button, select Organizational Accounts, Cloud - Single Organization, enter the name of your Azure AD tenant, and set the Access Level to Single Sign On.  You will be prompted to sign-in to your Azure AD tenant.  NOTE:  You must sign-in with a user that is in the tenant; you cannot, during this step, sign-in with a Microsoft account.
-3. In the `Models` folder add a new class called `TodoItem.cs`.  Copy the implementation of TodoItem from this sample into the class.
-4. Add a new, empty, Web API 2 controller called `TodoListController`.
-5. Copy the implementation of the TodoListController from this sample into the controller.  Don't forget to add the `[Authorize]` attribute to the class.
-6. In `TodoListController` resolving missing references by adding `using` statements for `System.Collections.Concurrent`, `TodoListService.Models`, `System.Security.Claims`.
+1. In the solution, create a new ASP.Net MVC web API project called TodoListService and while creating the project, click the Change Authentication button, select Organizational Accounts, Cloud - Single Organization, enter the name of your Azure AD tenant, and set the Access Level to Single Sign On.  You will be prompted to sign-in to your Azure AD tenant.  NOTE:  You must sign-in with a user that is in the tenant; you cannot, during this step, sign-in with a Microsoft account.
+2. In the `Models` folder add a new class called `TodoItem.cs`.  Copy the implementation of TodoItem from this sample into the class.
+3. Add a new, empty, Web API 2 controller called `TodoListController`.
+4. Copy the implementation of the TodoListController from this sample into the controller.  Don't forget to add the `[Authorize]` attribute to the class.
+5. In `TodoListController` resolving missing references by adding `using` statements for `System.Collections.Concurrent`, `TodoListService.Models`, `System.Security.Claims`.
 
 ### Creating the TodoListWebApp Project
 
-1. In Visual Studio 2013, create a new ASP.Net MVC web application called TodoListWebApp with Authentication set to No Authentication.
+1. In the solution, create a new ASP.Net MVC web application called TodoListWebApp with Authentication set to No Authentication.
 2. Set SSL Enabled to be True.  Note the SSL URL.
 3. In the project properties, Web properties, set the Project Url to be the SSL URL.
 4. Add the following ASP.Net OWIN middleware NuGets: Microsoft.IdentityModel.Protocol.Extensions, System.IdentityModel.Tokens.Jwt, Microsoft.Owin.Security.OpenIdConnect, Microsoft.Owin.Security.Cookies, Microsoft.Owin.Host.SystemWeb.
