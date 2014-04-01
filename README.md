@@ -3,7 +3,7 @@ WebApp-WebAPI-OpenIDConnect-DotNet
 
 This sample shows how to build an MVC web application that uses Azure AD for sign-in using the OpenID Connect protocol, and then calls a web API under the signed-in user's identity using tokens obtained via OAuth 2.0. This sample uses the OpenID Connect ASP.Net OWIN middleware and ADAL .Net.
 
-For more information about how the protocols work in this scenario and other scenarios, see the [Authentication Scenarios](http://msdn.microsoft.com/aad) for Azure AD document.
+For more information about how the protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).
 
 ## How To Run This Sample
 
