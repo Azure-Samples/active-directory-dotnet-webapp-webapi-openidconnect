@@ -1,8 +1,25 @@
-﻿using System;
+﻿//----------------------------------------------------------------------------------------------
+//    Copyright 2013 Microsoft Corporation
+//
+//    Licensed under the Apache License, Version 2.0 (the "License");
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+//----------------------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
+// The following using statements were added for this sample.
 using Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
@@ -34,7 +51,7 @@ namespace TodoListWebApp
         string authority = String.Format(CultureInfo.InvariantCulture, aadInstance, tenant);
 
         // This is the resource ID of the AAD Graph API.  We'll need this to request a token to call the Graph API.
-        string graphResourceId = "https://graph.windows.net";
+        string graphResourceId = ConfigurationManager.AppSettings["ida:GraphResourceId"];
 
         public void ConfigureAuth(IAppBuilder app)
         {
@@ -61,9 +78,10 @@ namespace TodoListWebApp
                             ClientCredential credential = new ClientCredential(clientId, appKey);
                             AuthenticationContext authContext = new AuthenticationContext(authority);
                             AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(
-                                code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)), credential, graphResourceId);
+                                code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority)), credential, graphResourceId);
 
-                            // Cache the access token and refresh token
+                            // Cache the access token and refresh token.
+                            // Shorten the lifetime of the access token by 5 minutes to accomodate for clock skew.
                             TokenCacheUtils.SaveAccessTokenInCache(graphResourceId, result.AccessToken, (result.ExpiresOn.AddMinutes(-5)).ToString());
                             TokenCacheUtils.SaveRefreshTokenInCache(result.RefreshToken);
 
