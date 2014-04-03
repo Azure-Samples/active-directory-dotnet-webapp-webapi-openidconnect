@@ -143,7 +143,9 @@ You can verify the certificate is in the Trusted Root store by running this comm
 
 ### Step 6:  Run the sample
 
-You know what to do!  Explore the sample by signing in, clicking the User Profile and To Do List links, adding items to the To Do list, signing out, and starting again.
+Clean the solution, rebuild the solution, and run it.  You might want to go into the solution properties and set both projects as startup projects, with the service project starting first.
+
+Explore the sample by signing in, clicking the User Profile and To Do List links, adding items to the To Do list, signing out, and starting again.
 
 ## How To Deploy This Sample to Azure
 
