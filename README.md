@@ -191,5 +191,6 @@ First, in Visual Studio 2013 create an empty solution to host the  projects.  Th
 20. In the shared `_Layout` view, add the Action Links for Profile and To Do List that are in the sample.
 21. In `web.config`, in `<appSettings>`, create keys for `ida:ClientId`, `ida:AppKey`, `ida:AADInstance`, `ida:Tenant`, `ida:PostLogoutRedirectUri`, `ida:GraphResourceId`, and `ida:GraphUserUrl` and set the values accordingly.  For the public Azure AD, the value of `ida:AADInstance` is `https://login.windows.net/{0}` the value of `ida:GraphResourceId` is `https://graph.windows.net`, and the value of `ida:GraphUserUrl` is `https://graph.windows.net/{0}/me?api-version=2013-11-08`.
 22. In `web.config` in `<appSettings>`, create keys for `todo:TodoListResourceId` and `todo:TodoListBaseAddress` and set the values accordinly.
+23. In `web.config` add this line in the `<system.web>` section: `<sessionState timeout="525600" />`.  This increases the ASP.Net session state timeout to it's maximum value so that access tokens and refresh tokens cache in session state aren't cleared after the default timeout of 20 minutes.
 
 Finally, in the properties of the solution itself, set both projects as startup projects.
