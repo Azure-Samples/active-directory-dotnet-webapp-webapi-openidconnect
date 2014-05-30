@@ -31,7 +31,7 @@
 
 @if (ViewBag.ErrorMessage == "AuthorizationRequired")
 {
-    <p>You have to sign-in to see your profile. Click @Html.ActionLink("here", "Index", "TodoList", new { reauth = true }, null) to sign-in.</p>
+    <p>You have to sign-in to see your to do list. Click @Html.ActionLink("here", "Index", "TodoList", new { reauth = true }, null) to sign-in.</p>
 
 }
 
