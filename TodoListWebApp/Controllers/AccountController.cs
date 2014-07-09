@@ -8,6 +8,10 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.OpenIdConnect;
 using Microsoft.Owin.Security.Cookies;
 using TodoListWebApp.Utils;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.Security.Claims;
+using System.Configuration;
+using System.Globalization;
 
 namespace TodoListWebApp.Controllers
 {
@@ -24,7 +28,10 @@ namespace TodoListWebApp.Controllers
         public void SignOut()
         {
             // Remove all cache entries for this user and send an OpenID Connect sign-out request.
-            TokenCacheUtils.RemoveAllFromCache();
+            string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+            AuthenticationContext authContext = new AuthenticationContext(Startup.Authority, new NaiveSessionCache(userObjectID));
+            authContext.TokenCache.Clear();
+
             HttpContext.GetOwinContext().Authentication.SignOut(
                 OpenIdConnectAuthenticationDefaults.AuthenticationType, CookieAuthenticationDefaults.AuthenticationType);
         }

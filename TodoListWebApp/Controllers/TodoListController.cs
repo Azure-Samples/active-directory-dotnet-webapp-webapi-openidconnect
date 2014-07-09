@@ -13,6 +13,7 @@ using Microsoft.Owin.Security.OpenIdConnect;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace TodoListWebApp.Controllers
 {
@@ -22,26 +23,71 @@ namespace TodoListWebApp.Controllers
         private string todoListResourceId = "https://skwantoso.com/TodoListService";
         private string todoListBaseAddress = "https://localhost:44321";
         private const string TenantIdClaimType = "http://schemas.microsoft.com/identity/claims/tenantid";
-
+        private static string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
+        private static string appKey = ConfigurationManager.AppSettings["ida:AppKey"];
         //
         // GET: /TodoList/
         public async Task<ActionResult> Index()
         {
-            //
-            // Retrieve the user's tenantID and access token since they are parameters used to call the To Do service.
-            //
-            string tenantId = ClaimsPrincipal.Current.FindFirst(TenantIdClaimType).Value;
-            string accessToken = TokenCacheUtils.GetAccessTokenFromCacheOrRefreshToken(tenantId, todoListResourceId);
+            AuthenticationResult result = null;
             List<TodoItem> itemList = new List<TodoItem>();
 
-            //
-            // If the user doesn't have an access token, they need to re-authorize.
-            //
-            if (accessToken == null)
+            try
             {
+                string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+                AuthenticationContext authContext = new AuthenticationContext(Startup.Authority, new NaiveSessionCache(userObjectID));
+                ClientCredential credential = new ClientCredential(clientId, appKey);
+                result = authContext.AcquireTokenSilent(todoListResourceId, credential, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
+
                 //
-                // If refresh is set to true, the user has clicked the link to be sent to be authorized again.
+                // Retrieve the user's To Do List.
                 //
+                HttpClient client = new HttpClient();
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, todoListBaseAddress + "/api/todolist");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
+                HttpResponseMessage response = await client.SendAsync(request);
+
+                //
+                // Return the To Do List in the view.
+                //
+                if (response.IsSuccessStatusCode)
+                {
+                    List<Dictionary<String, String>> responseElements = new List<Dictionary<String, String>>();
+                    JsonSerializerSettings settings = new JsonSerializerSettings();
+                    String responseString = await response.Content.ReadAsStringAsync();
+                    responseElements = JsonConvert.DeserializeObject<List<Dictionary<String, String>>>(responseString, settings);
+                    foreach (Dictionary<String, String> responseElement in responseElements)
+                    {
+                        TodoItem newItem = new TodoItem();
+                        newItem.Title = responseElement["Title"];
+                        newItem.Owner = responseElement["Owner"];
+                        itemList.Add(newItem);
+                    }
+
+                    return View(itemList);
+                }
+                else
+                {
+                    //
+                    // If the call failed with access denied, then drop the current access token from the cache, 
+                    //     and show the user an error indicating they might need to sign-in again.
+                    //
+                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Resource == todoListResourceId);
+                        foreach (TokenCacheItem tci in todoTokens)
+                            authContext.TokenCache.DeleteItem(tci);                            
+
+                        ViewBag.ErrorMessage = "UnexpectedError";
+                        TodoItem newItem = new TodoItem();
+                        newItem.Title = "(No items in list)";
+                        itemList.Add(newItem);
+                        return View(itemList);
+                    }
+                }
+            }
+            catch (Exception ee)
+            {
                 if (Request.QueryString["reauth"] == "True")
                 {
                     //
@@ -62,50 +108,6 @@ namespace TodoListWebApp.Controllers
                 return View(itemList);
             }
 
-            //
-            // Retrieve the user's To Do List.
-            //
-            HttpClient client = new HttpClient();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, todoListBaseAddress + "/api/todolist");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            //
-            // Return the To Do List in the view.
-            //
-            if (response.IsSuccessStatusCode)
-            {
-                List<Dictionary<String, String>> responseElements = new List<Dictionary<String, String>>();
-                JsonSerializerSettings settings = new JsonSerializerSettings();
-                String responseString = await response.Content.ReadAsStringAsync();
-                responseElements = JsonConvert.DeserializeObject<List<Dictionary<String, String>>>(responseString, settings);
-                foreach (Dictionary<String, String> responseElement in responseElements)
-                {
-                    TodoItem newItem = new TodoItem();
-                    newItem.Title = responseElement["Title"];
-                    newItem.Owner = responseElement["Owner"];
-                    itemList.Add(newItem);
-                }
-
-                return View(itemList);
-            }
-            else
-            {
-                //
-                // If the call failed with access denied, then drop the current access token from the cache, 
-                //     and show the user an error indicating they might need to sign-in again.
-                //
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                {
-                    TokenCacheUtils.RemoveAccessTokenFromCache(todoListResourceId);
-
-                    ViewBag.ErrorMessage = "UnexpectedError";
-                    TodoItem newItem = new TodoItem();
-                    newItem.Title = "(No items in list)";
-                    itemList.Add(newItem);
-                    return View(itemList);
-                }
-            }
 
             //
             // If the call failed for any other reason, show the user an error.
@@ -122,14 +124,59 @@ namespace TodoListWebApp.Controllers
                 //
                 // Retrieve the user's tenantID and access token since they are parameters used to call the To Do service.
                 //
-                string tenantId = ClaimsPrincipal.Current.FindFirst(TenantIdClaimType).Value;
-                string accessToken = TokenCacheUtils.GetAccessTokenFromCacheOrRefreshToken(tenantId, todoListResourceId);
+                AuthenticationResult result = null;
                 List<TodoItem> itemList = new List<TodoItem>();
 
-                //
-                // If the user doesn't have an access token, they need to re-authorize.
-                //
-                if (accessToken == null)
+                try
+                {
+                    string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+                    AuthenticationContext authContext = new AuthenticationContext(Startup.Authority, new NaiveSessionCache(userObjectID));
+                    ClientCredential credential = new ClientCredential(clientId, appKey);
+                    result = authContext.AcquireTokenSilent(todoListResourceId, credential, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
+
+
+
+                    // Forms encode todo item, to POST to the todo list web api.
+                    HttpContent content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Title", item) });
+
+                    //
+                    // Add the item to user's To Do List.
+                    //
+                    HttpClient client = new HttpClient();
+                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, todoListBaseAddress + "/api/todolist");
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
+                    request.Content = content;
+                    HttpResponseMessage response = await client.SendAsync(request);
+
+                    //
+                    // Return the To Do List in the view.
+                    //
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        //
+                        // If the call failed with access denied, then drop the current access token from the cache, 
+                        //     and show the user an error indicating they might need to sign-in again.
+                        //
+                        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                        {
+                            var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Resource == todoListResourceId);
+                            foreach (TokenCacheItem tci in todoTokens)
+                                authContext.TokenCache.DeleteItem(tci);  
+
+                            ViewBag.ErrorMessage = "UnexpectedError";
+                            TodoItem newItem = new TodoItem();
+                            newItem.Title = "(No items in list)";
+                            itemList.Add(newItem);
+                            return View(newItem);
+                        }
+                    }
+
+                }
+                catch (Exception ee)// TODO: verify that the exception is 'silentauth failed'
                 {
                     //
                     // The user needs to re-authorize.  Show them a message to that effect.
@@ -139,45 +186,8 @@ namespace TodoListWebApp.Controllers
                     itemList.Add(newItem);
                     ViewBag.ErrorMessage = "AuthorizationRequired";
                     return View(itemList);
+
                 }
-
-                // Forms encode todo item, to POST to the todo list web api.
-                HttpContent content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Title", item) });
-
-                //
-                // Add the item to user's To Do List.
-                //
-                HttpClient client = new HttpClient();
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, todoListBaseAddress + "/api/todolist");
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                request.Content = content;
-                HttpResponseMessage response = await client.SendAsync(request);
-
-                //
-                // Return the To Do List in the view.
-                //
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    //
-                    // If the call failed with access denied, then drop the current access token from the cache, 
-                    //     and show the user an error indicating they might need to sign-in again.
-                    //
-                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    {
-                        TokenCacheUtils.RemoveAccessTokenFromCache(todoListResourceId);
-
-                        ViewBag.ErrorMessage = "UnexpectedError";
-                        TodoItem newItem = new TodoItem();
-                        newItem.Title = "(No items in list)";
-                        itemList.Add(newItem);
-                        return View(newItem);
-                    }
-                }
-
                 //
                 // If the call failed for any other reason, show the user an error.
                 //
