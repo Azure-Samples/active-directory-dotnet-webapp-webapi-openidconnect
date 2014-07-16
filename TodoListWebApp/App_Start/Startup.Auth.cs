@@ -29,6 +29,7 @@ using System.Globalization;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.Threading.Tasks;
 using TodoListWebApp.Utils;
+using System.Security.Claims;
 
 namespace TodoListWebApp
 {
@@ -48,7 +49,7 @@ namespace TodoListWebApp
         private static string tenant = ConfigurationManager.AppSettings["ida:Tenant"];
         private static string postLogoutRedirectUri = ConfigurationManager.AppSettings["ida:PostLogoutRedirectUri"];
 
-        string authority = String.Format(CultureInfo.InvariantCulture, aadInstance, tenant);
+        public static readonly string Authority = String.Format(CultureInfo.InvariantCulture, aadInstance, tenant);
 
         // This is the resource ID of the AAD Graph API.  We'll need this to request a token to call the Graph API.
         string graphResourceId = ConfigurationManager.AppSettings["ida:GraphResourceId"];
@@ -63,7 +64,7 @@ namespace TodoListWebApp
                 new OpenIdConnectAuthenticationOptions
                 {
                     Client_Id = clientId,
-                    Authority = authority,
+                    Authority = Authority,
                     Post_Logout_Redirect_Uri = postLogoutRedirectUri,
 
                     Notifications = new OpenIdConnectAuthenticationNotifications()
@@ -76,14 +77,9 @@ namespace TodoListWebApp
                             var code = context.Code;
 
                             ClientCredential credential = new ClientCredential(clientId, appKey);
-                            AuthenticationContext authContext = new AuthenticationContext(authority);
-                            AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(
-                                code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority)), credential, graphResourceId);
-
-                            // Cache the access token and refresh token.
-                            // Shorten the lifetime of the access token by 5 minutes to accomodate for clock skew.
-                            TokenCacheUtils.SaveAccessTokenInCache(graphResourceId, result.AccessToken, (result.ExpiresOn.AddMinutes(-5)).ToString());
-                            TokenCacheUtils.SaveRefreshTokenInCache(result.RefreshToken);
+                            string userObjectID = context.ClaimsIdentity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+                            AuthenticationContext authContext = new AuthenticationContext(Authority, new NaiveSessionCache(userObjectID));
+                            AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)), credential, graphResourceId);
 
                             return Task.FromResult(0);
                         }
