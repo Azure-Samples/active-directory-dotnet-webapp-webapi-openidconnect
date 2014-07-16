@@ -8,15 +8,6 @@ using System.Web;
 namespace TodoListWebApp.Utils
 {
 
-
-            //System.Web.HttpContext.Current.Session[CachePrefix + "RefreshToken"] = value;
-
-            //return System.Web.HttpContext.Current.Session[CachePrefix + "RefreshToken"];
-
-            //System.Web.HttpContext.Current.Session.Remove(CachePrefix + "RefreshToken");
-      
-
-
     public class NaiveSessionCache: TokenCache
     {
         private static readonly object FileLock = new object();
@@ -29,10 +20,25 @@ namespace TodoListWebApp.Utils
 
             this.AfterAccess = AfterAccessNotification;
             this.BeforeAccess = BeforeAccessNotification;
+            Load();
+        }
+
+        public void Load()
+        {
             lock (FileLock)
             {
-                var cache = HttpContext.Current.Session[CacheId];
-                this.Deserialize(cache != null ? ProtectedData.Unprotect((byte[])cache, null, DataProtectionScope.LocalMachine) : null);
+                this.Deserialize((byte[])HttpContext.Current.Session[CacheId]);
+            }
+        }
+
+        public void Persist()
+        {
+            lock (FileLock)
+            {
+                // reflect changes in the persistent store
+                HttpContext.Current.Session[CacheId] = this.Serialize();
+                // once the write operation took place, restore the HasStateChanged bit to false
+                this.HasStateChanged = false;
             }
         }
 
@@ -43,15 +49,17 @@ namespace TodoListWebApp.Utils
             System.Web.HttpContext.Current.Session.Remove(CacheId);
         }
 
+        public override void DeleteItem(TokenCacheItem item)
+        {
+            base.DeleteItem(item);
+            Persist(); 
+        }
+
         // Triggered right before ADAL needs to access the cache.
         // Reload the cache from the persistent store in case it changed since the last access.
          void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (FileLock)
-            {
-                var cache = HttpContext.Current.Session[CacheId];
-                this.Deserialize(cache != null ? ProtectedData.Unprotect((byte[])cache, null, DataProtectionScope.LocalMachine) : null);
-            }
+            Load();
         }
 
         // Triggered right after ADAL accessed the cache.
@@ -60,13 +68,7 @@ namespace TodoListWebApp.Utils
             // if the access operation resulted in a cache update
             if (this.HasStateChanged)
             {
-                lock (FileLock)
-                {                    
-                    // reflect changes in the persistent store
-                    HttpContext.Current.Session[CacheId] = ProtectedData.Protect(this.Serialize(),null,DataProtectionScope.LocalMachine);
-                    // once the write operation took place, restore the HasStateChanged bit to false
-                    this.HasStateChanged = false;
-                }                
+                Persist();                  
             }
         }
     }

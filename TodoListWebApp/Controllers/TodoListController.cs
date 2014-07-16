@@ -20,7 +20,7 @@ namespace TodoListWebApp.Controllers
     [Authorize]
     public class TodoListController : Controller
     {
-        private string todoListResourceId = "https://skwantoso.com/TodoListService";
+        private string todoListResourceId = ConfigurationManager.AppSettings["ida:TodoListServiceResourceId"];
         private string todoListBaseAddress = "https://localhost:44321";
         private const string TenantIdClaimType = "http://schemas.microsoft.com/identity/claims/tenantid";
         private static string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
