@@ -149,7 +149,48 @@ Explore the sample by signing in, clicking the User Profile and To Do List links
 
 ## How To Deploy This Sample to Azure
 
-Coming soon.
+To deploy the TodoListService and TodoListWebApp to Azure Web Sites, you will create two web sites, publish each project to a web site, and update the TodoListWebApp to call the web site instead of IIS Express.
+
+### Create and Publish the TodoListService to an Azure Web Site
+
+1. Sign in to the [Azure management portal](https://manage.windowsazure.com).
+2. Click on Web Sites in the left hand nav.
+3. Click New in the bottom left hand corner, select Compute --> Web Site --> Quick Create, select the hosting plan and region, and give your web site a name, e.g. todolistservice-contoso.azurewebsites.net.  Click Create Web Site.
+4. Once the web site is created, click on it to manage it.  For this set of steps, download the publish profile and save it.  Other deployment mechanisms, such as from source control, can also be used.
+5. Switch to Visual Studio and go to the TodoListService project.  Right click on the project in the Solution Explorer and select Publish.  Click Import, and import the publish profile that you just downloaded.
+6. On the Connection tab, update the Destination URL so that it is https, for example https://todolistservice-skwantoso.azurewebsites.net.  Click Next.
+7. On the Settings tab, make sure Enable Organizational Authentication is NOT selected.  Click Publish.
+8. Visual Studio will publish the project and automatically open a browser to the URL of the project.  If you see the default web page of the project, the publication was successful.
+
+### Create a TodoListWebApp Azure Web Site
+
+1. Navigate to the [Azure management portal](https://manage.windowsazure.com).
+2. Click on Web Sites in the left hand nav.
+3. Click New in the bottom left hand corner, select Compute --> Web Site --> Quick Create, select the hosting plan and region, and give your web site a name, e.g. todolistwebapp-contoso.azurewebsites.net.  Click Create Web Site.
+4. Once the web site is created, click on it to manage it.  For this set of steps, download the publish profile and save it.  Other deployment mechanisms, such as from source control, can also be used.
+
+### Update the TodoListWebApp to call the TodoListService Running in Azure Web Sites
+
+1. In Visual Studio, go to the TodoListWebApp project.
+2. Open `web.config`.  Two changes are needed - first, update the `todo:TodoListBaseAddress` key value to be the address of the website you published, e.g. https://todolistservice-skwantoso.azurewebsites.net.  Second, update the `ida:PostLogoutRedirectUri` key value to be the address of website you published, e.g. https://todolistwebapp-skwantoso.azurewebsites.net.
+
+### Update the Application Configurations in the Directory Tenant
+
+1. Navigate to the [Azure management portal](https://manage.windowsazure.com).
+2. In the left hand nav, clink on Active Directory and select your tenant.
+3. On the applications tab, select the TodoListService application.
+4. On the Configure tab, update the Sign-On URL and Reply URL fields to the address of your service, for example https://todolistservice-skwantoso.azurewebsites.net.  Save the configuration.
+5. Navigate to the TodoListWebApp application within your Active Directory tenant.
+6. On the Configure tab, update the Sign-On URL and the Reply URL fields to the address of your web app, for example https://todolistwebapp-skwantoso.azurewebsites.net.  Save the configuration.
+
+### Publish the TodoListWebApp to the Azure Web Site
+
+1. In Visual Studio, right click on the TodoListWebApp project in the Solution Explorer and select Publish.  Click Import, and import the publish profile that you downloaded.
+2. On the Connection tab, update the Destination URL so that it is https, for example https://todolistwebapp-skwantoso.azurewebsites.net.  Click Next.
+3. On the Settings tab, make sure Enable Organizational Authentication is NOT selected.  Click Publish.
+4. Visual Studio will publish the project and automatically open a browser to the URL of the project.  If you see the default web page of the project, the publication was successful.
+
+NOTE:  Remember, the To Do list is stored in memory in this TodoListService sample.  Azure Web Sites will spin down your web site if it is inactive, and your To Do list will get emptied.  Also, if you increase the instance count of the web site, requests will be distributed among the instances and the To Do will not be the same on each instance.
 
 ## About The Code
 
@@ -183,12 +224,12 @@ First, in Visual Studio 2013 create an empty solution to host the  projects.  Th
 12. If you want the user to be required to sign-in before they can see any page of the app, then in the `HomeController`, decorate the `HomeController` class with the `[Authorize]` attribute.  If you leave this out, the user will be able to see the home page of the app without having to sign-in first, and can click the sign-in link on that page to get signed in.
 13. In the `Models` folder add a new class called `TodoItem.cs`.  Copy the implementation of TodoItem from this sample into the class.
 14. In the `Models` folder add a new class called `UserProfile.cs`.  Copy the implementation of UserProfile from this sample into the class.
-15. In the project, create a new folder called `Utils`.  In the folder, create a new class called `TokenCacheUtils.cs`.  Copy the implementation of the class from the sample.
+15. In the project, create a new folder called `Utils`.  In the folder, create a new class called `NaiveSessionCache.cs`.  Copy the implementation of the class from the sample.
 16. Add a new empty MVC5 controller TodoListController to the project.  Copy the implementation of the controller from the sample.  Remember to include the [Authorize] attribute on the class definition.
 17. Add a new empty MVC5 controller UserProfileController to the project.  Copy the implementation of the controller from the sample.  Again, remember to include the [Authorize] attribute on the class definition.
 18. In `Views` --> `TodoList` create a new view, `Index.cshtml`, and copy the implementation from this sample.
 19. In `Views` --> `UserProfile` create a new view, `Index.cshtml`, and copy the implementation from this sample.
-20. In the shared `_Layout` view, add the Action Links for Profile and To Do List that are in the sample.
+20. In the shared `_Layout` view, make sure the Action Links for Profile and To Do List that are in the sample have been added.
 21. In `web.config`, in `<appSettings>`, create keys for `ida:ClientId`, `ida:AppKey`, `ida:AADInstance`, `ida:Tenant`, `ida:PostLogoutRedirectUri`, `ida:GraphResourceId`, and `ida:GraphUserUrl` and set the values accordingly.  For the public Azure AD, the value of `ida:AADInstance` is `https://login.windows.net/{0}` the value of `ida:GraphResourceId` is `https://graph.windows.net`, and the value of `ida:GraphUserUrl` is `https://graph.windows.net/{0}/me?api-version=2013-11-08`.
 22. In `web.config` in `<appSettings>`, create keys for `todo:TodoListResourceId` and `todo:TodoListBaseAddress` and set the values accordinly.
 23. In `web.config` add this line in the `<system.web>` section: `<sessionState timeout="525600" />`.  This increases the ASP.Net session state timeout to it's maximum value so that access tokens and refresh tokens cache in session state aren't cleared after the default timeout of 20 minutes.
