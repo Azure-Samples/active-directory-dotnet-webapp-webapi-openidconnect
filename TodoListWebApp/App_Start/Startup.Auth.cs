@@ -63,21 +63,21 @@ namespace TodoListWebApp
             app.UseOpenIdConnectAuthentication(
                 new OpenIdConnectAuthenticationOptions
                 {
-                    Client_Id = clientId,
+                    ClientId = clientId,
                     Authority = Authority,
-                    Post_Logout_Redirect_Uri = postLogoutRedirectUri,
+                    PostLogoutRedirectUri = postLogoutRedirectUri,
 
                     Notifications = new OpenIdConnectAuthenticationNotifications()
                     {
                         //
                         // If there is a code in the OpenID Connect response, redeem it for an access token and refresh token, and store those away.
                         //
-                        AccessCodeReceived = (context) =>
+                        AuthorizationCodeReceived = (context) =>
                         {
                             var code = context.Code;
 
                             ClientCredential credential = new ClientCredential(clientId, appKey);
-                            string userObjectID = context.ClaimsIdentity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+                            string userObjectID = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
                             AuthenticationContext authContext = new AuthenticationContext(Authority, new NaiveSessionCache(userObjectID));
                             AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)), credential, graphResourceId);
 
