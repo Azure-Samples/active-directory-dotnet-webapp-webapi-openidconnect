@@ -82,6 +82,13 @@ namespace TodoListWebApp
                             AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)), credential, graphResourceId);
 
                             return Task.FromResult(0);
+                        },
+
+                        AuthenticationFailed = context =>
+                        {
+                            context.HandleResponse();
+                            context.Response.Redirect("/Home/Error?message=" + context.Exception.Message);
+                            return Task.FromResult(0);
                         }
 
                     }

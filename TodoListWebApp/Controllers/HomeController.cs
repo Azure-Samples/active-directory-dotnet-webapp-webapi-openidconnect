@@ -26,5 +26,11 @@ namespace TodoListWebApp.Controllers
 
             return View();
         }
+
+        public ActionResult Error(string message)
+        {
+            ViewBag.Message = message;
+            return View("Error");
+        }
     }
 }
