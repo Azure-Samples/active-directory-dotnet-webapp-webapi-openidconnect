@@ -217,6 +217,12 @@
     <None Include="Properties\PublishProfiles\strockisservice - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\strockisservice - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\strockisservice - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\treylabstodolist - FTP %282%29.pubxml" />
+    <None Include="Properties\PublishProfiles\treylabstodolist - FTP %283%29.pubxml" />
+    <None Include="Properties\PublishProfiles\treylabstodolist - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\treylabstodolist - Web Deploy %282%29.pubxml" />
+    <None Include="Properties\PublishProfiles\treylabstodolist - Web Deploy %283%29.pubxml" />
+    <None Include="Properties\PublishProfiles\treylabstodolist - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
@@ -224,7 +230,9 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
