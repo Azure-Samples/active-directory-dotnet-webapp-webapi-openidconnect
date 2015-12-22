@@ -1,18 +1,16 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Web;
+using System.Threading;
 
 namespace TodoListWebApp.Utils
 {
 
     public class NaiveSessionCache: TokenCache
     {
-        private static readonly object FileLock = new object();
+        private static ReaderWriterLockSlim SessionLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         string UserObjectId = string.Empty;
         string CacheId = string.Empty;
+
         public NaiveSessionCache(string userId)
         {
             UserObjectId = userId;
@@ -25,21 +23,21 @@ namespace TodoListWebApp.Utils
 
         public void Load()
         {
-            lock (FileLock)
-            {
-                this.Deserialize((byte[])HttpContext.Current.Session[CacheId]);
-            }
+            SessionLock.EnterReadLock();
+            this.Deserialize((byte[])HttpContext.Current.Session[CacheId]);
+            SessionLock.ExitReadLock();
         }
 
         public void Persist()
         {
-            lock (FileLock)
-            {
-                // reflect changes in the persistent store
-                HttpContext.Current.Session[CacheId] = this.Serialize();
-                // once the write operation took place, restore the HasStateChanged bit to false
-                this.HasStateChanged = false;
-            }
+            SessionLock.EnterWriteLock();
+
+            // Optimistically set HasStateChanged to false. We need to do it early to avoid losing changes made by a concurrent thread.
+            this.HasStateChanged = false;
+
+            // Reflect changes in the persistent store
+            HttpContext.Current.Session[CacheId] = this.Serialize();
+            SessionLock.ExitWriteLock();
         }
 
         // Empties the persistent store.
@@ -49,15 +47,9 @@ namespace TodoListWebApp.Utils
             System.Web.HttpContext.Current.Session.Remove(CacheId);
         }
 
-        public override void DeleteItem(TokenCacheItem item)
-        {
-            base.DeleteItem(item);
-            Persist(); 
-        }
-
         // Triggered right before ADAL needs to access the cache.
         // Reload the cache from the persistent store in case it changed since the last access.
-         void BeforeAccessNotification(TokenCacheNotificationArgs args)
+        void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
             Load();
         }
@@ -68,7 +60,7 @@ namespace TodoListWebApp.Utils
             // if the access operation resulted in a cache update
             if (this.HasStateChanged)
             {
-                Persist();                  
+                Persist();
             }
         }
     }
