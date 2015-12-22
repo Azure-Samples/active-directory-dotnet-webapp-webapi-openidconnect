@@ -31,6 +31,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Owin.Security;
 
 namespace TodoListWebApp.Controllers
 {
@@ -54,7 +55,7 @@ namespace TodoListWebApp.Controllers
                 string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
                 AuthenticationContext authContext = new AuthenticationContext(Startup.Authority, new NaiveSessionCache(userObjectID));
                 ClientCredential credential = new ClientCredential(clientId, appKey);
-                result = authContext.AcquireTokenSilent(todoListResourceId, credential, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
+                result = await authContext.AcquireTokenSilentAsync(todoListResourceId, credential, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
 
                 //
                 // Retrieve the user's To Do List.
@@ -110,9 +111,15 @@ namespace TodoListWebApp.Controllers
                     //
                     // Send an OpenID Connect sign-in request to get a new set of tokens.
                     // If the user still has a valid session with Azure AD, they will not be prompted for their credentials.
+                    // If the user needs to sign in again, the login_hint (see Startup.Auth.cs) can be used to pre-populate the username field.
                     // The OpenID Connect middleware will return to this controller after the sign-in response has been handled.
                     //
-                    HttpContext.GetOwinContext().Authentication.Challenge(OpenIdConnectAuthenticationDefaults.AuthenticationType);
+                    HttpContext.GetOwinContext().Authentication.Challenge(
+                        new AuthenticationProperties(
+                            new Dictionary<string, string> {
+                                { "login_hint", ClaimsPrincipal.Current.FindFirst(ClaimTypes.Upn).Value }
+                            }),
+                        OpenIdConnectAuthenticationDefaults.AuthenticationType);
                 }
 
                 //
@@ -149,7 +156,7 @@ namespace TodoListWebApp.Controllers
                     string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
                     AuthenticationContext authContext = new AuthenticationContext(Startup.Authority, new NaiveSessionCache(userObjectID));
                     ClientCredential credential = new ClientCredential(clientId, appKey);
-                    result = authContext.AcquireTokenSilent(todoListResourceId, credential, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
+                    result = await authContext.AcquireTokenSilentAsync(todoListResourceId, credential, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
 
 
 

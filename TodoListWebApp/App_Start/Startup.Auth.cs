@@ -30,6 +30,8 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.Threading.Tasks;
 using TodoListWebApp.Utils;
 using System.Security.Claims;
+using Microsoft.Owin.Security.Notifications;
+using Microsoft.IdentityModel.Protocols;
 
 namespace TodoListWebApp
 {
@@ -47,7 +49,7 @@ namespace TodoListWebApp
         private static string appKey = ConfigurationManager.AppSettings["ida:AppKey"];
         private static string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
         private static string tenant = ConfigurationManager.AppSettings["ida:Tenant"];
-        private static string postLogoutRedirectUri = ConfigurationManager.AppSettings["ida:PostLogoutRedirectUri"];
+        private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
 
         public static readonly string Authority = String.Format(CultureInfo.InvariantCulture, aadInstance, tenant);
 
@@ -65,35 +67,56 @@ namespace TodoListWebApp
                 {
                     ClientId = clientId,
                     Authority = Authority,
-                    PostLogoutRedirectUri = postLogoutRedirectUri,
+                    PostLogoutRedirectUri = redirectUri,
+                    RedirectUri = redirectUri,
 
                     Notifications = new OpenIdConnectAuthenticationNotifications()
                     {
                         //
                         // If there is a code in the OpenID Connect response, redeem it for an access token and refresh token, and store those away.
                         //
-                        AuthorizationCodeReceived = (context) =>
-                        {
-                            var code = context.Code;
-
-                            ClientCredential credential = new ClientCredential(clientId, appKey);
-                            string userObjectID = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
-                            AuthenticationContext authContext = new AuthenticationContext(Authority, new NaiveSessionCache(userObjectID));
-                            AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)), credential, graphResourceId);
-
-                            return Task.FromResult(0);
-                        },
-
-                        AuthenticationFailed = context =>
-                        {
-                            context.HandleResponse();
-                            context.Response.Redirect("/Home/Error?message=" + context.Exception.Message);
-                            return Task.FromResult(0);
-                        }
-
+                        AuthorizationCodeReceived = OnAuthorizationCodeReceived,
+                        RedirectToIdentityProvider = OnRedirectToIdentityProvider,
+                        AuthenticationFailed = OnAuthenticationFailed
                     }
 
                 });
+        }
+
+        private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+        {
+            context.HandleResponse();
+            context.Response.Redirect("/Home/Error?message=" + context.Exception.Message);
+            return Task.FromResult(0);
+        }
+
+        private Task OnRedirectToIdentityProvider(RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+        {
+            if (context.ProtocolMessage.RequestType == OpenIdConnectRequestType.AuthenticationRequest)
+            {
+                string loginHint;
+                if (context.OwinContext.Authentication.AuthenticationResponseChallenge.Properties.Dictionary.TryGetValue("login_hint", out loginHint))
+                {
+                    context.ProtocolMessage.LoginHint = loginHint;
+                }
+            }
+
+            return Task.FromResult(0);
+        }
+
+        private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification context)
+        {
+            var code = context.Code;
+
+            ClientCredential credential = new ClientCredential(clientId, appKey);
+            string userObjectID = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+            AuthenticationContext authContext = new AuthenticationContext(Authority, new NaiveSessionCache(userObjectID));
+
+            // If you create the redirectUri this way, it will contain a trailing slash.  
+            // Make sure you've registered the same exact Uri in the Azure Portal (including the slash).
+            Uri uri = new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path));
+
+            AuthenticationResult result = await authContext.AcquireTokenByAuthorizationCodeAsync(code, uri, credential, graphResourceId);
         }
     }
 }
