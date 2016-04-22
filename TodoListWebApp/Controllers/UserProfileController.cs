@@ -101,7 +101,7 @@ namespace TodoListWebApp.Controllers
 
                 return View(profile);
             }
-            catch (Exception ee)
+            catch (AdalException ee)
             {
                 //
                 // If the user doesn't have an access token, they need to re-authorize.
@@ -115,14 +115,10 @@ namespace TodoListWebApp.Controllers
                     //
                     // Send an OpenID Connect sign-in request to get a new set of tokens.
                     // If the user still has a valid session with Azure AD, they will not be prompted for their credentials.
-                    // If the user needs to sign in again, the login_hint (see Startup.Auth.cs) can be used to pre-populate the username field.
                     // The OpenID Connect middleware will return to this controller after the sign-in response has been handled.
                     //
                     HttpContext.GetOwinContext().Authentication.Challenge(
-                        new AuthenticationProperties(
-                            new Dictionary<string, string> {
-                                { "login_hint", ClaimsPrincipal.Current.FindFirst(ClaimTypes.Upn).Value }
-                            }),
+                        new AuthenticationProperties(),
                         OpenIdConnectAuthenticationDefaults.AuthenticationType);
                 }
 

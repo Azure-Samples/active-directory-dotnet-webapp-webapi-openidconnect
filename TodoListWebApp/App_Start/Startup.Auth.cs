@@ -76,7 +76,6 @@ namespace TodoListWebApp
                         // If there is a code in the OpenID Connect response, redeem it for an access token and refresh token, and store those away.
                         //
                         AuthorizationCodeReceived = OnAuthorizationCodeReceived,
-                        RedirectToIdentityProvider = OnRedirectToIdentityProvider,
                         AuthenticationFailed = OnAuthenticationFailed
                     }
 
@@ -87,20 +86,6 @@ namespace TodoListWebApp
         {
             context.HandleResponse();
             context.Response.Redirect("/Home/Error?message=" + context.Exception.Message);
-            return Task.FromResult(0);
-        }
-
-        private Task OnRedirectToIdentityProvider(RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
-        {
-            if (context.ProtocolMessage.RequestType == OpenIdConnectRequestType.AuthenticationRequest)
-            {
-                string loginHint;
-                if (context.OwinContext.Authentication.AuthenticationResponseChallenge.Properties.Dictionary.TryGetValue("login_hint", out loginHint))
-                {
-                    context.ProtocolMessage.LoginHint = loginHint;
-                }
-            }
-
             return Task.FromResult(0);
         }
 
