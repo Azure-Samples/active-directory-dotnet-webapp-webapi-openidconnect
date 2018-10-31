@@ -1,0 +1,100 @@
+{
+  "Sample": {
+    "Title": "Calling a web API in a web app using Azure AD and OpenID Connect",
+    "Level": 200,
+    "Client": "ASP.NET 4.7.1 Web App (MVC)",
+    "Service": "ASP.NET 4.7.1 Web API"
+  },
+
+  /*
+    This section describes the Azure AD Applications to configure, and their dependencies
+  */
+  "AADApps": [
+    {
+      "Id": "service",
+      "Name": "TodoListService-webapp-webapi-openidconnect",
+      "IsPublicClient": false,
+      "HomePage": "https://localhost:44321/",
+      "ReplyUrls": "https://localhost:44321/",
+      "LogoutUrl": "https://localhost:44321/Account/EndSession",
+      "PasswordCredentials": "Auto",
+      "IsAvailableToOtherTenants": true,
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [ "User.Read" ]
+        }
+      ]
+    },
+    {
+      "Id": "client",
+      "Name": "TodoListWebApp-webapp-webapi-openidconnect",
+      "IsPublicClient": false,
+      "HomePage": "https://localhost:44322/",
+      "ReplyUrls": "https://localhost:44322/",
+      "LogoutUrl": "https://localhost:44322/Account/EndSession",
+      "PasswordCredentials": "Auto",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [ "User.Read" ]
+        },{
+          "Resource": "service",
+          "DelegatedPermissions": [ "user_impersonation" ]
+        }
+      ]
+    }
+  ],
+
+  /*
+    This section describes how to update the code in configuration files from the apps coordinates, once the apps
+    are created in Azure AD.
+    Each section describes a configuration file, for one of the apps, it's type (XML, JSon, plain text), its location
+    with respect to the root of the sample, and the mappping (which string in the config file is mapped to which value
+  */
+  "CodeConfiguration": [
+    {
+      "App": "service",
+      "SettingKind": "XML",
+      "SettingFile": "\\..\\TodoListService\\Web.Config",
+      "Mappings": [
+        {
+          "key": "ida:Tenant",
+          "value": "$tenantName"
+        },
+        {
+          "key": "ida:Audience",
+          "value": "service.IdentifierUris"
+        }
+      ]
+    },
+
+    {
+      "App": "client",
+      "SettingKind": "XML",
+      "SettingFile": "\\..\\TodoListWebApp\\Web.Config",
+      "Mappings": [
+        {
+          "key": "ida:Tenant",
+          "value": "$tenantName"
+        },
+        {
+          "key": "ida:ClientId",
+          "value": "client.AppId"
+        },
+        {
+          "key": "ida:AppKey",
+          "value": "$key"
+        },
+        {
+          "key": "todo:TodoListResourceid",
+          "value": "service.IdentifierUris"
+        },
+        {
+          "key": "todo:TodoListBaseAddress",
+          "value": "service.HomePage"
+        }
+      ]
+    }
+  ]
+}
