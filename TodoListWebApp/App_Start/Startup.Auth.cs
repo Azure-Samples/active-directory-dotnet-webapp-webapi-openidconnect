@@ -82,14 +82,14 @@ namespace TodoListWebApp
                 });
         }
 
-        private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+        private static Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
         {
             context.HandleResponse();
             context.Response.Redirect("/Home/Error?message=" + context.Exception.Message);
             return Task.FromResult(0);
         }
 
-        private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification context)
+        private static async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification context)
         {
             var code = context.Code;
 
