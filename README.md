@@ -118,7 +118,9 @@ Explore the sample by signing in, clicking the User Profile and To Do List links
 
 ## How To Deploy This Sample to Azure
 
-To deploy the TodoListService and TodoListWebApp to Azure Web Sites, you will create two web sites, publish each project to a web site, and update the TodoListWebApp to call the web site instead of IIS Express.
+To deploy the TodoListService and TodoListWebApp to Azure Web Sites, you will create two web sites, publish each project to a web site, and update the TodoListWebApp to call the web site instead of IIS Express.  
+
+The TodoListWebApp\Utils\NaiveSessionCache.cs implementation does not support azure deployment where multi-instance service plans are enabled. For those scenarios use a multi-instance supported TokenCache solution such as an azure redis cache based TokenCache implementation like the one found in [this](https://www.nuget.org/packages/MyUsrn.Dnx.Core/) nuget package.  
 
 ### Create and Publish the TodoListService to an Azure Web Site
 
