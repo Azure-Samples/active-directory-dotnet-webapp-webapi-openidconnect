@@ -1,7 +1,15 @@
 ---
-services: active-directory
-platforms: dotnet
-author: dstrockis
+page_type: sample
+languages:
+- csharp
+- javascript
+- html
+- css
+- other
+products:
+- azure
+description: "This sample shows how to build an MVC web application that uses Azure AD for sign-in using the OpenID Connect protocol, and then calls a web API under the signed-in user's identity using tokens obtained via OAuth 2.0."
+urlFragment: active-directory-dotnet-webapp-webapi-openidconnect
 ---
 
 # Calling a web API in a web app using Azure AD and OpenID Connect  
