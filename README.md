@@ -5,7 +5,7 @@ languages:
 - javascript
 - html
 products:
-- azure
+- azure-active-directory
 description: "This sample shows how to build an MVC web application that uses Azure AD for sign-in using the OpenID Connect protocol."
 urlFragment: active-directory-dotnet-webapp-webapi-openidconnect
 ---
